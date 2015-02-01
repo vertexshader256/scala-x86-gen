@@ -1,15 +1,9 @@
-package com.scalaAsm.x86.Instructions
+package com.scalax86.gen
 
 import java.io._
-import com.scalaAsm.x86.OperandTypes._
-import com.scalaAsm.x86.AddressingMethods._
-import com.scalaAsm.x86.AddressingMethods.AddressingMethod
-import com.scalaAsm.x86.OperandTypes.OperandSize
-import com.scalaAsm.x86.AddressingMethods.ModRMByteMemoryOnly
 import scala.xml._
 import java.io.PrintWriter
 import scala.collection.mutable.LinkedHashSet
-import com.scalaAsm.x86.OperandTypes.{_8, _16, _32}
 
 object GenerateInst {
 
@@ -507,9 +501,9 @@ object GenerateInst {
   }
 
   def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
-    val newFolder = new File("src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
+    val newFolder = new File("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
     if (!newFolder.exists()) newFolder.mkdirs()
-    val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
+    val writer = new PrintWriter("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
     // assume all instructions for a mnemonic have the same numOpcodeByte values.  I've investigated - this is safe!
     val numOpcodeBytes = instructions.head.numOpcodeBytes
