@@ -11,5 +11,6 @@ scalaVersion := "2.11.2"
 //playScalaSettings
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.2"
+libraryDependencies += "org.scala-lang" % "scala-swing" % "2.11+"
 
 lazy val scalax86 = project.in(file("."))

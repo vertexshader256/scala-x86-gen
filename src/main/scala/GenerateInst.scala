@@ -4,6 +4,7 @@ import java.io._
 import scala.xml._
 import java.io.PrintWriter
 import scala.collection.mutable.LinkedHashSet
+import scala.swing._
 
 object GenerateInst {
 
@@ -69,7 +70,7 @@ object GenerateInst {
       val prefix: Seq[String] = getOperand.map { op =>
         op match {
           case OperandInstance(address, operandType, size, _) =>
-            if (operandType.isInstanceOf[FixedOperandType] && operandType.asInstanceOf[FixedOperandType].promotedByRex && op.operandSize.size == 64) {
+            if (operandType.isInstanceOf[FixedOperandType] && operandType.asInstanceOf[FixedOperandType].promotedByRex && op.operandSize == "64") {
               Seq("override def prefix = REX.W(true)\n")
             } else {
               Nil
@@ -133,7 +134,7 @@ object GenerateInst {
 
     def getSize: Int = {
       val modSize = if (entry.hasModRMByte) 1 else 0
-      1 + modSize + operand.operandSize.size / 8
+      1 + modSize + operand.operandSize.toInt / 8
     }
   }
 
@@ -153,15 +154,15 @@ object GenerateInst {
     def hasImplicitOperand = false
     
     def getExplicitFormat = {
-      if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
-            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32) {
+      if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == "32" &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == "32") {
         Seq("override def explicitFormat(op1: r32, op2: rm32) = {\n",
              "  if (op2.isInstanceOf[reg]) {\n",
              "    Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))\n",
              "  } else None\n",
              "}\n")
-      } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
-            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32) {
+      } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == "32" &&
+            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == "32") {
         Seq("override def explicitFormat(op1: rm32, op2: r32) = {\n",
              "  if (op1.isInstanceOf[reg]) {\n",
              "     Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))\n",
@@ -175,7 +176,7 @@ object GenerateInst {
 
     def getSize: Int = {
       val modSize = if (entry.hasModRMByte) 1 else 0
-      1 + modSize + operands._2.operandSize.size / 8
+      1 + modSize + operands._2.operandSize.toInt / 8
     }
   }
 
@@ -227,7 +228,7 @@ object GenerateInst {
 
   case class TwoOperandDef(operand1: OperandDef, operand2: OperandDef) {
 
-    def zipSizes(op1Sizes: Seq[(OperandType, OperandSize)], op2Sizes: Seq[(OperandType, OperandSize)]): Seq[TwoOperandInstance] = {
+    def zipSizes(op1Sizes: Seq[(OperandType, String)], op2Sizes: Seq[(OperandType, String)]): Seq[TwoOperandInstance] = {
       op1Sizes.zip(op2Sizes).map { x =>
         val op1 = OperandInstance(
           operand1.addressingMethod,
@@ -245,25 +246,25 @@ object GenerateInst {
 
     def getInstances: Seq[TwoOperandInstance] = {
       //if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
-        val op1Sizes: Seq[(OperandType, OperandSize)] = operand1.operandType match {
+        val op1Sizes: Seq[(OperandType, String)] = operand1.operandType match {
           case Some(CompositeOperandType(_, _, components, _)) => components map { size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size) }
           case Some(FixedOperandType(_, _, size, _, _)) => Seq((operand1.operandType.get, size))
           case _ => {
             operand1.addressingMethod match {
               case Some(ModRMByteMemoryOnly) =>
-                Seq((null, NoSize))
+                Seq((null, ""))
                 
               case _ => Seq()
             }
           }
         }
-        val op2Sizes: Seq[(OperandType, OperandSize)] = operand2.operandType match {
+        val op2Sizes: Seq[(OperandType, String)] = operand2.operandType match {
           case Some(CompositeOperandType(_, _, components, _)) => components map { size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size) }
           case Some(FixedOperandType(_, _, size, _, _)) => Seq((operand2.operandType.get, size))
           case _ => {
             operand2.addressingMethod match {
               case Some(ModRMByteMemoryOnly) =>
-                Seq((null, NoSize))
+                Seq((null, ""))
                 
               case _ => Seq()
             }
@@ -331,7 +332,7 @@ object GenerateInst {
 
     def getInstances: Seq[OperandInstance] = {
       if (operandType.isDefined) {
-        val opSizes: Seq[(OperandType, OperandSize)] = operandType match {
+        val opSizes: Seq[(OperandType, String)] = operandType match {
           case Some(CompositeOperandType(_, _, sizes, _)) => sizes map { size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size) }
           case Some(FixedOperandType(_, _, size, _, _)) => Seq((operandType.get, size))
           case _ => Seq()
@@ -352,7 +353,7 @@ object GenerateInst {
             Seq(OperandInstance(
               addressingMethod,
               null,
-              NoSize,
+              "",
               explicitOperandName))
           case _ => Seq()
         }
@@ -362,19 +363,19 @@ object GenerateInst {
 
   case class OperandInstance(addressingMethod: Option[AddressingMethod],
                              operandType: OperandType,
-                             operandSize: OperandSize,
+                             operandSize: String,
                              explicitOperandName: Option[String]) {
     override def toString = {
       
       def addy = addressingMethod.map { addy => addy.toString }.getOrElse("")
-      def size = if (addy != "Sreg") operandSize.toString else "" 
+      def size = if (addy != "Sreg") operandSize else "" 
       
       explicitOperandName.map { name => 
         if (name == "rAX") {
-          operandSize.size match {
-            case 16 => "AX"
-            case 32 => "EAX"
-            case 64 => "RAX"
+          operandSize match {
+            case "16" => "AX"
+            case "32" => "EAX"
+            case "64" => "RAX"
             case _ => "ERROR"
           }
         } else {
@@ -500,10 +501,10 @@ object GenerateInst {
     result
   }
 
-  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
-    val newFolder = new File("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
+  def outputInstructionFile(path: String, mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
+    val newFolder = new File(path + "/" + folder)
     if (!newFolder.exists()) newFolder.mkdirs()
-    val writer = new PrintWriter("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
+    val writer = new PrintWriter(path + "/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
     // assume all instructions for a mnemonic have the same numOpcodeByte values.  I've investigated - this is safe!
     val numOpcodeBytes = instructions.head.numOpcodeBytes
@@ -512,12 +513,12 @@ object GenerateInst {
     val (low, high) = instructions.partition { inst =>
       inst match {
         case x86TwoOperandInstruction(_, _, _, operands, _) if operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined =>
-          val is64 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _64 &&
-            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _64
-          val is32 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
-            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32
-          val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _16 &&
-            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _16
+          val is64 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == "64" &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == "64"
+          val is32 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == "32" &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == "32"
+          val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == "16" &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == "16"
           val hasRM = operands._2.addressingMethod.get.abbreviation == "rm" || operands._1.addressingMethod.get.abbreviation == "rm"
           hasRM && !(is64 || is32 || is16)
         case x86OneOperandInstruction(_, _, _, operand, _) if operand.addressingMethod.isDefined && operand.addressingMethod.isDefined =>
@@ -582,41 +583,47 @@ object GenerateInst {
 
   def main(args: Array[String]): Unit = {
     try {
-      println("Generating x86 instructions...")
-      val insts = loadXML().flatMap { x => x.getInstances }
-      println(insts.size + " instruction instances generated!")
-      val genFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }
-      genFiles.foreach{ 
-           case (mnem, insts)  => { 
-             val uniqueInst = LinkedHashSet[InstructionInstance]()
-             uniqueInst ++= insts
-             outputInstructionFile(mnem, uniqueInst, "General")
+      val chooser = new FileChooser
+      chooser.fileSelectionMode_=(FileChooser.SelectionMode.DirectoriesOnly)
+      val textArea = new TextArea(20,60)
+      if (chooser.showSaveDialog(textArea)==FileChooser.Result.Approve) {
+        println(chooser.selectedFile.toString)
+        println("Generating x86 instructions...")
+        val insts = loadXML().flatMap { x => x.getInstances }
+        println(insts.size + " instruction instances generated!")
+        val genFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }
+        genFiles.foreach{ 
+             case (mnem, insts)  => { 
+               val uniqueInst = LinkedHashSet[InstructionInstance]()
+               uniqueInst ++= insts
+               outputInstructionFile(chooser.selectedFile.toString, mnem, uniqueInst, "General")
+             }
+             case _ =>
            }
-           case _ =>
-         }
-      
-      val x87Files = insts.filter(inst => inst.entry.group1.getOrElse("") == "x87fpu").groupBy { x => x.mnemonic }
-      x87Files.foreach{ 
-           case (mnem, insts)  => { 
-             val uniqueInst = LinkedHashSet[InstructionInstance]()
-             uniqueInst ++= insts
-             outputInstructionFile(mnem, uniqueInst, "x87")
+        
+        val x87Files = insts.filter(inst => inst.entry.group1.getOrElse("") == "x87fpu").groupBy { x => x.mnemonic }
+        x87Files.foreach{ 
+             case (mnem, insts)  => { 
+               val uniqueInst = LinkedHashSet[InstructionInstance]()
+               uniqueInst ++= insts
+               outputInstructionFile(chooser.selectedFile.toString, mnem, uniqueInst, "x87")
+             }
+             case _ =>
            }
-           case _ =>
-         }
-      
-      val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system").groupBy { x => x.mnemonic }
-      systemFiles.foreach{ 
-           case (mnem, insts)  => { 
-             val uniqueInst = LinkedHashSet[InstructionInstance]()
-             uniqueInst ++= insts
-             outputInstructionFile(mnem, uniqueInst, "System")
+        
+        val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system").groupBy { x => x.mnemonic }
+        systemFiles.foreach{ 
+             case (mnem, insts)  => { 
+               val uniqueInst = LinkedHashSet[InstructionInstance]()
+               uniqueInst ++= insts
+               outputInstructionFile(chooser.selectedFile.toString, mnem, uniqueInst, "System")
+             }
+             case _ =>
            }
-           case _ =>
-         }
-      
-      println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
-      println("Done generating instructions!")
+        
+        println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
+        println("Done generating instructions!")
+      }
     } catch {
       case e: Exception => e.printStackTrace()
     }
