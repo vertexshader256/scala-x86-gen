@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE x86reference SYSTEM "x86reference.dtd">
 
 <!-- Visit http://ref.x86asm.net/ -->
 
@@ -120,6 +121,7 @@ Should I add this comment?
       </entry>
       <entry attr="invd" mode="e">
 	<proc_start>10</proc_start>
+	<syntax/>
 	<note><brief>Invalid Instruction in 64-Bit Mode</brief></note>
       </entry>
     </pri_opcd>

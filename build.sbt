@@ -10,6 +10,9 @@ scalaVersion := "2.11.2"
 
 //playScalaSettings
 
+libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.2"
 
 lazy val scalax86 = project.in(file("."))
+
+unmanagedSourceDirectories in Compile := (scalaSource in Compile).value :: Nil

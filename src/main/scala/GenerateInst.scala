@@ -4,8 +4,6 @@ import java.io._
 import scala.xml._
 import java.io.PrintWriter
 import scala.collection.mutable.LinkedHashSet
-import org.apache.xerces.parsers.SAXParser
-import org.xml.sax.helpers.DefaultHandler
 
 object GenerateInst {
 
@@ -469,38 +467,7 @@ object GenerateInst {
     x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte, brief, grp1, grp2, grp3)
   }
 
-  class Validator extends DefaultHandler {
-    var validationError = false
-    var saxParseException: SAXParseException = null
-    override def error(exception: SAXParseException) {
-      println("XML SCHEMA ERROR: " + exception);
-     validationError = true;
-     saxParseException = exception;
-    }     
-    override def fatalError(exception: SAXParseException) {
-      println("XML SCHEMA ERROR: " + exception);
-     validationError = true;      
-     saxParseException = exception;      
-    }       
-    override def warning(exception: SAXParseException) { }
-  }
-  
   def loadXML(): Seq[x86InstructionDef] = {
-
-    val parser = new SAXParser()
-    parser.setFeature("http://xml.org/sax/features/validation", true); 
-    parser.setFeature("http://apache.org/xml/features/validation/schema", true);
-    parser.setFeature("http://apache.org/xml/features/validation/schema-full-checking", true);
-    val xsd = new File("x86.xsd")
-    parser.setProperty(
-     "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation",
-     xsd.toURI.toString);
-    
-    val handler = new Validator();
-    parser.setErrorHandler(handler);
-    val file = new File("x86reference.xml")
-    parser.parse(file.toURI().toString);
-    
     val xml = XML.loadFile("x86reference.xml")
     val one_opcodes = (xml \ "one-byte" \\ "pri_opcd")
     val two_opcodes = (xml \ "two-byte" \\ "pri_opcd")
