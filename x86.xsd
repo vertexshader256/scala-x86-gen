@@ -1,158 +1,157 @@
-﻿<?xml version="1.0"?>
+?<?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" elementFormDefault="qualified" vc:minVersion="1.1">
 
-<xs:element name="x86reference">
-  <xs:complexType>
-    <xs:sequence minOccurs="1">
-      <xs:element name="one-byte" minOccurs="1" maxOccurs="1" type="opcodeType"/>
-      <xs:element name="two-byte" minOccurs="1" maxOccurs="1" type="opcodeType"/>
-      <xs:element name="gen_notes" minOccurs="1" maxOccurs="1" type="gennotesType"/>
-      <xs:element name="ring_notes" minOccurs="1" maxOccurs="1" type="ringnotesType"/>
-    </xs:sequence>
-    <xs:attribute name="version" type="xs:string" use="required"/>
-  </xs:complexType>
-</xs:element>
+	<xs:element name="x86reference">
+		<xs:complexType>
+			<xs:sequence minOccurs="1">
+				<xs:element name="one-byte" minOccurs="1" maxOccurs="1" type="opcodeType"/>
+				<xs:element name="two-byte" minOccurs="1" maxOccurs="1" type="opcodeType"/>
+				<xs:element name="gen_notes" minOccurs="1" maxOccurs="1" type="gennotesType"/>
+				<xs:element name="ring_notes" minOccurs="1" maxOccurs="1" type="ringnotesType"/>
+			</xs:sequence>
+			<xs:attribute name="version" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
 
-<xs:complexType name="gennotesType" >
-  <xs:sequence>
-    <xs:element name="gen_note" maxOccurs="unbounded" >
-    <xs:complexType >
-       <xs:attribute name="id" type="xs:string" use="required"/>
-  </xs:complexType>
-  </xs:element>
-  </xs:sequence>
-</xs:complexType>
+	<xs:complexType name="gennotesType" >
+		<xs:sequence>
+			<xs:element name="gen_note" maxOccurs="unbounded" >
+				<xs:complexType >
+					<xs:attribute name="id" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 
-<xs:complexType name="ringnotesType" >
-  <xs:sequence>
-    <xs:element name="ring_note" maxOccurs="unbounded" >
-    <xs:complexType >
-       <xs:attribute name="id" type="xs:string" use="required"/>
-  </xs:complexType>
-  </xs:element>
-  </xs:sequence>
-</xs:complexType>
+	<xs:complexType name="ringnotesType" >
+		<xs:sequence>
+			<xs:element name="ring_note" maxOccurs="unbounded" >
+				<xs:complexType >
+					<xs:attribute name="id" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 
-<xs:complexType name="opcodeType" >
-  <xs:sequence>
-    <xs:element name="pri_opcd" maxOccurs="unbounded" type="priopcdType"/>
-  </xs:sequence>
-  <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="skip" />
-</xs:complexType>
+	<xs:complexType name="opcodeType" >
+		<xs:sequence>
+			<xs:element name="pri_opcd" maxOccurs="unbounded" type="priopcdType"/>
+		</xs:sequence>
+		<xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="skip" />
+	</xs:complexType>
 
-<xs:complexType name="priopcdType">
-  <xs:sequence>
-    <xs:element name="proc_start" minOccurs="0" maxOccurs="1" type="xs:int"/>
-  	<xs:element name="entry" minOccurs="1" maxOccurs="unbounded" type="entryType"/>   
-  </xs:sequence>
-  <xs:attribute name="value" type="xs:hexBinary" use="required"/>
-</xs:complexType>
+	<xs:complexType name="priopcdType">
+		<xs:sequence>
+			<xs:element name="proc_start" minOccurs="0" maxOccurs="1" type="xs:int"/>
+			<xs:element name="entry" minOccurs="1" maxOccurs="unbounded" type="entryType"/>
+		</xs:sequence>
+		<xs:attribute name="value" type="xs:hexBinary" use="required"/>
+	</xs:complexType>
 
-<xs:complexType name="entryType">
-  <xs:all>
-    <xs:element name="proc_start" minOccurs="0" maxOccurs="1">
-      <xs:complexType mixed="true">
-        <xs:attribute name="post" use="optional" type="xs:string"/>
-        <xs:attribute name="lat_step" use="optional" type="xs:string"/>
-      </xs:complexType>
-    </xs:element>
-    
-    <xs:element name="sec_opcd" minOccurs="0" maxOccurs="1">
-    <xs:complexType mixed="true">
-        <xs:attribute name="escape" use="optional" type="xs:string"/>
-      </xs:complexType>
-    </xs:element>
-    <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="modif_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="undef_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="f_vals_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="def_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="instr_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
-    <xs:element name="proc_end" minOccurs="0" maxOccurs="1" type="xs:int"/>
-  	<xs:element name="pref" minOccurs="0" maxOccurs="1" type="xs:hexBinary"/>
-  	<xs:element name="syntax" minOccurs="0" maxOccurs="4" type="syntaxType"/>
-  	<xs:element name="grp1" minOccurs="0"  maxOccurs="1" type="xs:string"/>
-  	<xs:element name="grp2" minOccurs="0" maxOccurs="2" type="xs:string"/> <!-- more than 1 here?! -->
-  	<xs:element name="grp3" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  	<xs:element name="modif_f" minOccurs="0" maxOccurs="1">
-  	<xs:complexType mixed="true">
-        <xs:attribute name="cond" use="optional" type="xs:string"/>
-      </xs:complexType>
-    </xs:element>
-  	<xs:element name="def_f" minOccurs="0" maxOccurs="1">
-  	 <xs:complexType mixed="true">
-        <xs:attribute name="cond" use="optional" type="xs:string"/>
-      </xs:complexType>
-    </xs:element>
-  	<xs:element name="undef_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  	<xs:element name="f_vals" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  	<xs:element name="test_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  	<xs:element name="note" minOccurs="0" maxOccurs="1" type="skipme"/>
-  </xs:all>
-  <xs:attribute name="doc_part_alias_ref" use="optional" type="xs:string"/>
-  <xs:attribute name="part_alias" use="optional" type="xs:string"/>
-  <xs:attribute name="mod" use="optional" type="xs:string"/>
-  <xs:attribute name="fpush" use="optional" type="xs:string"/>
-  <xs:attribute name="fpop" use="optional" type="xs:string"/>
-  <xs:attribute name="mem_format" use="optional" type="xs:string"/>
-  <xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
-  <xs:attribute name="alias" use="optional" type="xs:string"/>
-  <xs:attribute name="tttn" use="optional" type="xs:string"/>
-  <xs:attribute name="sign-ext" use="optional" type="xs:string"/>
-  <xs:attribute name="particular" use="optional" type="xs:string"/>
-  <xs:attribute name="doc" use="optional" type="xs:string"/>
-  <xs:attribute name="doc_ref" use="optional" type="xs:string"/>
-  <xs:attribute name="is_doc" use="optional" type="xs:string"/>
-  <xs:attribute name="is_undoc" use="optional" type="xs:string"/>
-  <xs:attribute name="ring" use="optional" type="xs:string"/>
-  <xs:attribute name="ring_ref" use="optional" type="xs:string"/>
-  <xs:attribute name="ref" use="optional" type="xs:string"/>
-  <xs:attribute name="mode" use="optional" type="xs:string"/>
-  <xs:attribute name="doc1632_ref" use="optional" type="xs:string"/>
-  <xs:attribute name="r" use="optional" type="xs:string"/>
-  <xs:attribute name="attr" use="optional" type="xs:string"/>
-  <xs:attribute name="lock" use="optional" type="xs:string"/>
-  <xs:attribute name="direction" use="optional" type="xs:string"/>
-  <xs:attribute name="op_size" use="optional" type="xs:string"/>
-  <xs:assert test="not(./@mode) or @mode = ('e', 'p', 's')"/>
+	<xs:complexType name="entryType">
+		<xs:all>
+			<xs:element name="proc_start" minOccurs="0" maxOccurs="1">
+				<xs:complexType mixed="true">
+					<xs:attribute name="post" use="optional" type="xs:string"/>
+					<xs:attribute name="lat_step" use="optional" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="sec_opcd" minOccurs="0" maxOccurs="1">
+				<xs:complexType mixed="true">
+					<xs:attribute name="escape" use="optional" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="opcd_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="modif_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="undef_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="f_vals_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="def_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="instr_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
+			<xs:element name="proc_end" minOccurs="0" maxOccurs="1" type="xs:int"/>
+			<xs:element name="pref" minOccurs="0" maxOccurs="1" type="xs:hexBinary"/>
+			<xs:element name="syntax" minOccurs="0" maxOccurs="4" type="syntaxType"/>
+			<xs:element name="grp1" minOccurs="0"  maxOccurs="1" type="xs:string"/>
+		<xs:element name="grp2" minOccurs="0" maxOccurs="2" type="xs:string"/> <!-- more than 1 here?! -->
+		<xs:element name="grp3" minOccurs="0" maxOccurs="1" type="xs:string"/>
+		<xs:element name="modif_f" minOccurs="0" maxOccurs="1">
+			<xs:complexType mixed="true">
+				<xs:attribute name="cond" use="optional" type="xs:string"/>
+			</xs:complexType>
+		</xs:element>
+		<xs:element name="def_f" minOccurs="0" maxOccurs="1">
+			<xs:complexType mixed="true">
+				<xs:attribute name="cond" use="optional" type="xs:string"/>
+			</xs:complexType>
+		</xs:element>
+		<xs:element name="undef_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
+		<xs:element name="f_vals" minOccurs="0" maxOccurs="1" type="xs:string"/>
+		<xs:element name="test_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
+		<xs:element name="note" minOccurs="0" maxOccurs="1" type="skipme"/>
+	</xs:all>
+	<xs:attribute name="doc_part_alias_ref" use="optional" type="xs:string"/>
+	<xs:attribute name="part_alias" use="optional" type="xs:string"/>
+	<xs:attribute name="mod" use="optional" type="xs:string"/>
+	<xs:attribute name="fpush" use="optional" type="xs:string"/>
+	<xs:attribute name="fpop" use="optional" type="xs:string"/>
+	<xs:attribute name="mem_format" use="optional" type="xs:string"/>
+	<xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
+	<xs:attribute name="alias" use="optional" type="xs:string"/>
+	<xs:attribute name="tttn" use="optional" type="xs:string"/>
+	<xs:attribute name="sign-ext" use="optional" type="xs:string"/>
+	<xs:attribute name="particular" use="optional" type="xs:string"/>
+	<xs:attribute name="doc" use="optional" type="xs:string"/>
+	<xs:attribute name="doc_ref" use="optional" type="xs:string"/>
+	<xs:attribute name="is_doc" use="optional" type="xs:string"/>
+	<xs:attribute name="is_undoc" use="optional" type="xs:string"/>
+	<xs:attribute name="ring" use="optional" type="xs:string"/>
+	<xs:attribute name="ring_ref" use="optional" type="xs:string"/>
+	<xs:attribute name="ref" use="optional" type="xs:string"/>
+	<xs:attribute name="mode" use="optional" type="xs:string"/>
+	<xs:attribute name="doc1632_ref" use="optional" type="xs:string"/>
+	<xs:attribute name="r" use="optional" type="xs:string"/>
+	<xs:attribute name="attr" use="optional" type="xs:string"/>
+	<xs:attribute name="lock" use="optional" type="xs:string"/>
+	<xs:attribute name="direction" use="optional" type="xs:string"/>
+	<xs:attribute name="op_size" use="optional" type="xs:string"/>
+	<xs:assert test="not(./@mode) or @mode = ('e', 'p', 's')"/>
 </xs:complexType>
 
 <xs:complexType name="skipme">
-    <xs:sequence>
-      <xs:any minOccurs="0" maxOccurs="unbounded"
-     processContents="skip"/>
-    </xs:sequence>
-    <xs:anyAttribute processContents="skip"/>
-  </xs:complexType>
+	<xs:sequence>
+		<xs:any minOccurs="0" maxOccurs="unbounded"
+		processContents="skip"/>
+	</xs:sequence>
+	<xs:anyAttribute processContents="skip"/>
+</xs:complexType>
 
 <xs:complexType name="syntaxType">
-  <xs:sequence minOccurs="0">
-  <xs:sequence minOccurs="1">
-    <xs:element name="mnem" minOccurs="1" maxOccurs="1">
-      <xs:complexType mixed="true">
-        <xs:attribute name="sug" use="optional" type="xs:string"/>
-      </xs:complexType>
-    </xs:element>
-    </xs:sequence>
-    <xs:choice minOccurs="0" maxOccurs="36">
-  	  <xs:element name="src" minOccurs="0" maxOccurs="1" type="operandType"/>
-  	  <xs:element name="dst" minOccurs="0" maxOccurs="1" type="operandType"/>
-  	</xs:choice>
-  </xs:sequence>
-  <xs:attribute name="mod" use="optional" type="xs:string"/>
+	<xs:sequence minOccurs="0">
+		<xs:sequence minOccurs="1">
+			<xs:element name="mnem" minOccurs="1" maxOccurs="1">
+				<xs:complexType mixed="true">
+					<xs:attribute name="sug" use="optional" type="xs:string"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:choice minOccurs="0" maxOccurs="36">
+			<xs:element name="src" minOccurs="0" maxOccurs="1" type="operandType"/>
+			<xs:element name="dst" minOccurs="0" maxOccurs="1" type="operandType"/>
+		</xs:choice>
+	</xs:sequence>
+	<xs:attribute name="mod" use="optional" type="xs:string"/>
 </xs:complexType>
 
 <xs:complexType name="operandType" mixed="true">
-  <xs:all>
-    <xs:element name="a" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  	<xs:element name="t" minOccurs="0" maxOccurs="1" type="xs:string"/>
-  </xs:all>
-  <xs:attribute name="nr" use="optional" type="xs:string"/>
-  <xs:attribute name="group" use="optional" type="xs:string"/>
-  <xs:attribute name="type" use="optional" type="xs:string"/>
-  <xs:attribute name="depend" use="optional" type="xs:string"/>
-  <xs:attribute name="address" use="optional" type="xs:string"/>
-  <xs:attribute name="displayed" use="optional" type="xs:string"/>
+	<xs:all>
+		<xs:element name="a" minOccurs="0" maxOccurs="1" type="xs:string"/>
+		<xs:element name="t" minOccurs="0" maxOccurs="1" type="xs:string"/>
+	</xs:all>
+	<xs:attribute name="nr" use="optional" type="xs:string"/>
+	<xs:attribute name="group" use="optional" type="xs:string"/>
+	<xs:attribute name="type" use="optional" type="xs:string"/>
+	<xs:attribute name="depend" use="optional" type="xs:string"/>
+	<xs:attribute name="address" use="optional" type="xs:string"/>
+	<xs:attribute name="displayed" use="optional" type="xs:string"/>
 </xs:complexType>
 
 </xs:schema>
