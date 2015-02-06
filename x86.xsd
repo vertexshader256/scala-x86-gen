@@ -38,6 +38,7 @@
       <xs:element name="pri_opcd" maxOccurs="unbounded" type="priopcdType"/>
     </xs:sequence>
     <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="skip"/>
+    <xs:assert test="count(distinct-values(pri_opcd/string(@value))) = count(pri_opcd/string(@value))"/>
   </xs:complexType>
   
   <xs:complexType name="priopcdType">
@@ -97,19 +98,39 @@
     </xs:all>
     <xs:attribute name="doc_part_alias_ref" use="optional" type="xs:string"/>
     <xs:attribute name="part_alias" use="optional" type="xs:string"/>
-    <xs:attribute name="mod" use="optional" type="xs:string"/>
+    <xs:attribute name="mod" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="mem"/>
+            <xs:enumeration value="nomem"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="fpush" use="optional" type="yes_no"/>
     <xs:attribute name="fpop" use="optional" type="xs:string"/>
     <xs:attribute name="mem_format" use="optional" type="xs:string"/>
     <xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
     <xs:attribute name="alias" use="optional" type="xs:string"/>
-    <xs:attribute name="tttn" use="optional" type="xs:string"/>
+    <xs:attribute name="tttn" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:pattern value="[0-1][0-1][0-1][0-1]"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="sign-ext" use="optional" type="xs:string" fixed="1"/>
     <xs:attribute name="particular" use="optional" type="yes_no"/>
-    <xs:attribute name="doc" use="optional" type="xs:string"/>
+    <xs:attribute name="doc" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="m"/>
+            <xs:enumeration value="u"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="doc_ref" use="optional" type="xs:string"/>
-    <xs:attribute name="is_doc" use="optional" type="xs:string"/>
-    <xs:attribute name="is_undoc" use="optional" type="xs:string"/>
+    <xs:attribute name="is_doc" use="optional" type="yes_no"/>
+    <xs:attribute name="is_undoc" use="optional" type="yes_no"/>
     <xs:attribute name="ring" use="optional" type="xs:string"/>
     <xs:attribute name="ring_ref" use="optional" type="xs:string"/>
     <xs:attribute name="ref" use="optional" type="xs:string"/>
@@ -188,7 +209,22 @@
         </xs:union>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="group" use="optional" type="xs:string"/>
+    <xs:attribute name="group" use="optional">
+    <xs:simpleType>
+         <xs:restriction base="xs:string">
+          <xs:enumeration value="gen"/>
+          <xs:enumeration value="x87fpu"/>
+          <xs:enumeration value="seg"/>
+          <xs:enumeration value="systabp"/>
+          <xs:enumeration value="ctrl"/>
+          <xs:enumeration value="msr"/>
+          <xs:enumeration value="xmm"/>
+          <xs:enumeration value="mmx"/>
+          <xs:enumeration value="debug"/>
+          <xs:enumeration value="xcr"/>
+        </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     <xs:attribute name="type" use="optional" type="xs:string"/>
     <xs:attribute name="depend" use="optional" type="yes_no"/>
     <xs:attribute name="address" use="optional" type="AddressType"/>
