@@ -229,7 +229,10 @@
     <xs:attribute name="depend" use="optional" type="yes_no"/>
     <xs:attribute name="address" use="optional" type="AddressType"/>
     <xs:attribute name="displayed" use="optional" type="yes_no"/>
-    <xs:assert test="if (./text()) then not(a) else true()"/> <!-- if there is an implicit operand, there shall not be an address type !--> 
+    <xs:assert test="if (./text()) then not(a) else true()"/> <!-- if there is an operand explicitly called out (so implicit), there shall not be an address type !--> 
+    <xs:assert test="if (a) then not(@address) else true()"/> <!-- if there is an a element, there shall not be a address attribute !-->
+    <xs:assert test="if (t) then not(@type) else true()"/> <!-- if there is an t element, there shall not be a type attribute !-->
+    <xs:assert test="if (text()[contains(., ':')]) then @displayed = 'no' or @address = ('X', 'Y', 'BB') else true()"/> <!-- if an explicit operand is called out and it contains a colon, @displayed shall be 'no' or the address shall be X,Y, or BB !-->
   </xs:complexType>
   
 <xs:simpleType name="AddressType">  
