@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" elementFormDefault="qualified" vc:minVersion="1.1">
 
   <xs:element name="x86reference">
@@ -61,7 +61,13 @@
           <xs:attribute name="escape" use="optional" type="xs:string"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
+      <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1">
+          <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:pattern value="[0-7]"/>
+        </xs:restriction>
+      </xs:simpleType>
+      </xs:element>
       <xs:element name="modif_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="undef_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="f_vals_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
@@ -92,14 +98,14 @@
     <xs:attribute name="doc_part_alias_ref" use="optional" type="xs:string"/>
     <xs:attribute name="part_alias" use="optional" type="xs:string"/>
     <xs:attribute name="mod" use="optional" type="xs:string"/>
-    <xs:attribute name="fpush" use="optional" type="xs:string"/>
+    <xs:attribute name="fpush" use="optional" type="yes_no"/>
     <xs:attribute name="fpop" use="optional" type="xs:string"/>
     <xs:attribute name="mem_format" use="optional" type="xs:string"/>
     <xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
     <xs:attribute name="alias" use="optional" type="xs:string"/>
     <xs:attribute name="tttn" use="optional" type="xs:string"/>
-    <xs:attribute name="sign-ext" use="optional" type="xs:string"/>
-    <xs:attribute name="particular" use="optional" type="xs:string"/>
+    <xs:attribute name="sign-ext" use="optional" type="xs:string" fixed="1"/>
+    <xs:attribute name="particular" use="optional" type="yes_no"/>
     <xs:attribute name="doc" use="optional" type="xs:string"/>
     <xs:attribute name="doc_ref" use="optional" type="xs:string"/>
     <xs:attribute name="is_doc" use="optional" type="xs:string"/>
@@ -107,14 +113,23 @@
     <xs:attribute name="ring" use="optional" type="xs:string"/>
     <xs:attribute name="ring_ref" use="optional" type="xs:string"/>
     <xs:attribute name="ref" use="optional" type="xs:string"/>
-    <xs:attribute name="mode" use="optional" type="xs:string"/>
+    <xs:attribute name="mode" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="e"/>  
+            <xs:enumeration value="p"/>  
+            <xs:enumeration value="s"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="doc1632_ref" use="optional" type="xs:string"/>
-    <xs:attribute name="r" use="optional" type="xs:string"/>
+    <xs:attribute name="r" use="optional" type="yes_no"/>
     <xs:attribute name="attr" use="optional" type="xs:string"/>
-    <xs:attribute name="lock" use="optional" type="xs:string"/>
-    <xs:attribute name="direction" use="optional" type="xs:string"/>
-    <xs:attribute name="op_size" use="optional" type="xs:string"/>
-    <xs:assert test="not(./@mode) or @mode = ('e', 'p', 's')"/>
+    <xs:attribute name="lock" use="optional" type="yes_no"/>
+    <xs:attribute name="direction" use="optional" type="OneOrZero"/>
+    <xs:attribute name="op_size" use="optional" type="OneOrZero">
+    
+    </xs:attribute>
   </xs:complexType>
   
   <xs:complexType name="skipme">
@@ -129,7 +144,7 @@
       <xs:sequence minOccurs="1">
         <xs:element name="mnem" minOccurs="1" maxOccurs="1">
           <xs:complexType mixed="true">
-            <xs:attribute name="sug" use="optional" type="xs:string"/>
+            <xs:attribute name="sug" use="optional" type="yes_no"/>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
@@ -146,11 +161,68 @@
       <xs:element name="a" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="t" minOccurs="0" maxOccurs="1" type="xs:string"/>
     </xs:all>
-    <xs:attribute name="nr" use="optional" type="xs:string"/>
+    <xs:attribute name="nr" use="optional">
+    <xs:simpleType>
+        <xs:union>
+        <xs:simpleType>
+        <xs:restriction base="xs:integer">
+          <xs:maxInclusive value="15"/>
+        </xs:restriction>
+        </xs:simpleType>
+        <xs:simpleType>
+        <xs:restriction base="xs:integer">
+        <xs:minInclusive value="172"/>
+          <xs:maxInclusive value="176"/>
+        </xs:restriction>
+        </xs:simpleType>
+         <xs:simpleType>
+         <xs:restriction base="xs:string">
+          <xs:enumeration value="C0000102"/>
+          <xs:enumeration value="C0000103"/>
+          <xs:enumeration value="C0000084"/>
+          <xs:enumeration value="C0000082"/>
+          <xs:enumeration value="C0000081"/>
+           <xs:enumeration value="8B"/>
+        </xs:restriction>
+        </xs:simpleType>
+        </xs:union>
+      </xs:simpleType>
+    </xs:attribute>
     <xs:attribute name="group" use="optional" type="xs:string"/>
     <xs:attribute name="type" use="optional" type="xs:string"/>
-    <xs:attribute name="depend" use="optional" type="xs:string"/>
-    <xs:attribute name="address" use="optional" type="xs:string"/>
-    <xs:attribute name="displayed" use="optional" type="xs:string"/>
+    <xs:attribute name="depend" use="optional" type="yes_no"/>
+    <xs:attribute name="address" use="optional" type="AddressType"/>
+    <xs:attribute name="displayed" use="optional" type="yes_no"/>
   </xs:complexType>
+  
+<xs:simpleType name="AddressType">  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="BA"/>
+            <xs:enumeration value="BB"/>
+            <xs:enumeration value="BD"/>
+            <xs:enumeration value="X"/>  
+            <xs:enumeration value="Y"/>  
+            <xs:enumeration value="SC"/>
+            <xs:enumeration value="S2"/>
+            <xs:enumeration value="S30"/>
+            <xs:enumeration value="S33"/>
+            <xs:enumeration value="F"/>
+            <xs:enumeration value="I"/>
+            <xs:enumeration value="EST"/>
+        </xs:restriction>  
+    </xs:simpleType>   
+  
+  <xs:simpleType name="OneOrZero">  
+      <xs:restriction base="xs:int">  
+          <xs:enumeration value="1"/>  
+          <xs:enumeration value="0"/>  
+      </xs:restriction>  
+  </xs:simpleType>  
+  
+  <xs:simpleType name="yes_no">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="yes"/>
+      <xs:enumeration value="no"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
