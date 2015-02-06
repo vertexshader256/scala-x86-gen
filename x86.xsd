@@ -229,6 +229,7 @@
     <xs:attribute name="depend" use="optional" type="yes_no"/>
     <xs:attribute name="address" use="optional" type="AddressType"/>
     <xs:attribute name="displayed" use="optional" type="yes_no"/>
+    <xs:assert test="if (./text()) then not(a) else true()"/> <!-- if there is an implicit operand, there shall not be an address type !--> 
   </xs:complexType>
   
 <xs:simpleType name="AddressType">  
