@@ -102,7 +102,7 @@
       </xs:element>
       <xs:element name="def_f" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="cond" use="optional" type="xs:string"/>
+          <xs:attribute name="cond" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="undef_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
@@ -122,7 +122,13 @@
     </xs:attribute>
     <xs:attribute name="fpush" use="optional" type="yes_no"/>
     <xs:attribute name="fpop" use="optional" type="xs:string"/>
-    <xs:attribute name="mem_format" use="optional" type="xs:string"/>
+    <xs:attribute name="mem_format" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:pattern value="[0-1][0-1]"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
     <xs:attribute name="alias" use="optional" type="xs:string"/>
     <xs:attribute name="tttn" use="optional">
@@ -145,8 +151,23 @@
     <xs:attribute name="doc_ref" use="optional" type="xs:string"/>
     <xs:attribute name="is_doc" use="optional" type="yes_no"/>
     <xs:attribute name="is_undoc" use="optional" type="yes_no"/>
-    <xs:attribute name="ring" use="optional" type="xs:string"/>
-    <xs:attribute name="ring_ref" use="optional" type="xs:string"/>
+    <xs:attribute name="ring" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="0"/>
+            <xs:enumeration value="f"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
+    <xs:attribute name="ring_ref" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="cr4_tsd"/>  
+            <xs:enumeration value="cr4_pce"/>  
+            <xs:enumeration value="rflags_iopl"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="ref" use="optional" type="xs:string"/>
     <xs:attribute name="mode" use="optional">
     <xs:simpleType>  
