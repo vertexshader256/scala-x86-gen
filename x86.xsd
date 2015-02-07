@@ -37,7 +37,7 @@
     <xs:sequence>
       <xs:element name="pri_opcd" maxOccurs="unbounded" type="priopcdType"/>
     </xs:sequence>
-    <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="skip"/>
+    <xs:anyAttribute namespace="http://www.w3.org/XML/1998/namespace" processContents="skip"/> <!-- xml:id !-->
     <xs:assert test="count(distinct-values(pri_opcd/string(@value))) = count(pri_opcd/string(@value))"/>
   </xs:complexType>
   
@@ -53,13 +53,13 @@
     <xs:all>
       <xs:element name="proc_start" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="post" use="optional" type="xs:string"/>
-          <xs:attribute name="lat_step" use="optional" type="xs:string"/>
+          <xs:attribute name="post" use="optional" type="yes_no"/>
+          <xs:attribute name="lat_step" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="sec_opcd" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="escape" use="optional" type="xs:string"/>
+          <xs:attribute name="escape" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1">
@@ -73,7 +73,21 @@
       <xs:element name="undef_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="f_vals_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="def_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-      <xs:element name="instr_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
+      <xs:element name="instr_ext" minOccurs="0" maxOccurs="1">
+      <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="sse1"/>
+            <xs:enumeration value="mmx"/>
+            <xs:enumeration value="sse2"/>
+            <xs:enumeration value="sse3"/>
+            <xs:enumeration value="ssse3"/>
+            <xs:enumeration value="vmx"/>
+            <xs:enumeration value="smx"/>
+            <xs:enumeration value="sse41"/>
+            <xs:enumeration value="sse42"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:element>
       <xs:element name="proc_end" minOccurs="0" maxOccurs="1" type="xs:int"/>
       <xs:element name="pref" minOccurs="0" maxOccurs="1" type="xs:hexBinary"/>
       <xs:element name="syntax" minOccurs="0" maxOccurs="4" type="syntaxType"/>
@@ -145,7 +159,20 @@
     </xs:attribute>
     <xs:attribute name="doc1632_ref" use="optional" type="xs:string"/>
     <xs:attribute name="r" use="optional" type="yes_no"/>
-    <xs:attribute name="attr" use="optional" type="xs:string"/>
+    <xs:attribute name="attr" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="serial"/>
+            <xs:enumeration value="invd"/>
+            <xs:enumeration value="acc"/>
+            <xs:enumeration value="delaysint"/>
+            <xs:enumeration value="undef"/>
+            <xs:enumeration value="null"/>
+            <xs:enumeration value="nop"/>
+            <xs:enumeration value="delaysint_cond"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="lock" use="optional" type="yes_no"/>
     <xs:attribute name="direction" use="optional" type="OneOrZero"/>
     <xs:attribute name="op_size" use="optional" type="OneOrZero">
