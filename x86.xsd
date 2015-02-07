@@ -149,8 +149,9 @@
     <xs:attribute name="lock" use="optional" type="yes_no"/>
     <xs:attribute name="direction" use="optional" type="OneOrZero"/>
     <xs:attribute name="op_size" use="optional" type="OneOrZero">
-    
     </xs:attribute>
+    <xs:assert test="if (grp1 = 'gen' and count(syntax/(dst | src)/@group) &gt; 0) then syntax/(dst | src)/@group = ('seg', 'gen') else true()"/>
+    <xs:assert test="if (grp1 = 'x87fpu' and count(syntax/(dst | src)/@group) &gt; 0) then syntax/(dst | src)/@group = ('x87fpu', 'gen') else true()"/>
   </xs:complexType>
   
   <xs:complexType name="skipme">
