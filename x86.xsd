@@ -53,13 +53,13 @@
     <xs:all>
       <xs:element name="proc_start" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="post" use="optional" type="xs:string"/>
-          <xs:attribute name="lat_step" use="optional" type="xs:string"/>
+          <xs:attribute name="post" use="optional" type="yes_no"/>
+          <xs:attribute name="lat_step" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="sec_opcd" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="escape" use="optional" type="xs:string"/>
+          <xs:attribute name="escape" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1">
@@ -73,7 +73,21 @@
       <xs:element name="undef_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="f_vals_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="def_f_fpu" minOccurs="0" maxOccurs="1" type="xs:string"/>
-      <xs:element name="instr_ext" minOccurs="0" maxOccurs="1" type="xs:string"/>
+      <xs:element name="instr_ext" minOccurs="0" maxOccurs="1">
+      <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="sse1"/>
+            <xs:enumeration value="mmx"/>
+            <xs:enumeration value="sse2"/>
+            <xs:enumeration value="sse3"/>
+            <xs:enumeration value="ssse3"/>
+            <xs:enumeration value="vmx"/>
+            <xs:enumeration value="smx"/>
+            <xs:enumeration value="sse41"/>
+            <xs:enumeration value="sse42"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:element>
       <xs:element name="proc_end" minOccurs="0" maxOccurs="1" type="xs:int"/>
       <xs:element name="pref" minOccurs="0" maxOccurs="1" type="xs:hexBinary"/>
       <xs:element name="syntax" minOccurs="0" maxOccurs="4" type="syntaxType"/>
@@ -83,7 +97,7 @@
       <xs:element name="grp3" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="modif_f" minOccurs="0" maxOccurs="1">
         <xs:complexType mixed="true">
-          <xs:attribute name="cond" use="optional" type="xs:string"/>
+          <xs:attribute name="cond" use="optional" type="yes_no"/>
         </xs:complexType>
       </xs:element>
       <xs:element name="def_f" minOccurs="0" maxOccurs="1">
@@ -108,7 +122,13 @@
     </xs:attribute>
     <xs:attribute name="fpush" use="optional" type="yes_no"/>
     <xs:attribute name="fpop" use="optional" type="xs:string"/>
-    <xs:attribute name="mem_format" use="optional" type="xs:string"/>
+     <xs:attribute name="mem_format" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:pattern value="[0-1][0-1]"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="doc64_ref" use="optional" type="xs:string"/>
     <xs:attribute name="alias" use="optional" type="xs:string"/>
     <xs:attribute name="tttn" use="optional">
@@ -131,8 +151,23 @@
     <xs:attribute name="doc_ref" use="optional" type="xs:string"/>
     <xs:attribute name="is_doc" use="optional" type="yes_no"/>
     <xs:attribute name="is_undoc" use="optional" type="yes_no"/>
-    <xs:attribute name="ring" use="optional" type="xs:string"/>
-    <xs:attribute name="ring_ref" use="optional" type="xs:string"/>
+ <xs:attribute name="ring" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="0"/>
+            <xs:enumeration value="f"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
+    <xs:attribute name="ring_ref" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="cr4_tsd"/>  
+            <xs:enumeration value="cr4_pce"/>  
+            <xs:enumeration value="rflags_iopl"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="ref" use="optional" type="xs:string"/>
     <xs:attribute name="mode" use="optional">
     <xs:simpleType>  
@@ -145,12 +180,27 @@
     </xs:attribute>
     <xs:attribute name="doc1632_ref" use="optional" type="xs:string"/>
     <xs:attribute name="r" use="optional" type="yes_no"/>
-    <xs:attribute name="attr" use="optional" type="xs:string"/>
+<xs:attribute name="attr" use="optional">
+    <xs:simpleType>  
+        <xs:restriction base="xs:string">  
+            <xs:enumeration value="serial"/>
+            <xs:enumeration value="invd"/>
+            <xs:enumeration value="acc"/>
+            <xs:enumeration value="delaysint"/>
+            <xs:enumeration value="undef"/>
+            <xs:enumeration value="null"/>
+            <xs:enumeration value="nop"/>
+            <xs:enumeration value="delaysint_cond"/>
+        </xs:restriction>  
+    </xs:simpleType> 
+    </xs:attribute>
     <xs:attribute name="lock" use="optional" type="yes_no"/>
     <xs:attribute name="direction" use="optional" type="OneOrZero"/>
     <xs:attribute name="op_size" use="optional" type="OneOrZero">
     
     </xs:attribute>
+    <xs:assert test="if (grp1 = 'gen' and count(syntax/(dst | src)/@group) &gt; 0) then syntax/(dst | src)/@group = ('seg', 'gen') else true()"/>
+    <xs:assert test="if (grp1 = 'x87fpu' and count(syntax/(dst | src)/@group) &gt; 0) then syntax/(dst | src)/@group = ('x87fpu', 'gen') else true()"/>
   </xs:complexType>
   
   <xs:complexType name="skipme">
@@ -233,6 +283,16 @@
     <xs:assert test="if (a) then not(@address) else true()"/> <!-- if there is an a element, there shall not be a address attribute !-->
     <xs:assert test="if (t) then not(@type) else true()"/> <!-- if there is an t element, there shall not be a type attribute !-->
     <xs:assert test="if (text()[contains(., ':')]) then @displayed = 'no' or @address = ('X', 'Y', 'BB') else true()"/> <!-- if an explicit operand is called out and it contains a colon, @displayed shall be 'no' or the address shall be X,Y, or BB !-->
+    <xs:assert test="if (text() and @group) then (@group = 'gen' and upper-case(text()) = ('ES', 'AX', 'BX', 'CX', 'DX', 'SP', 'BP', 'SI', 'DI', 'RAX', 'RBX', 'RDX', 'RCX', 'RBP', 'RSP', 'AL', 'CL', 'EAX', 'EBX', 'ECX', 'EDX', 'ESP', 'EBP', 'ESI', 'EDI', 'AH', 'R11')) or
+    (@group = 'mmx' and text() = ('MMX0', 'MMX1', 'MMX2', 'MMX3', 'MMX4', 'MMX5', 'MMX6', 'MMX7')) or 
+    (@group = 'seg' and text() = ('CS', 'DS', 'GS', 'SS', 'ES', 'FS')) or 
+    (@group = 'xmm' and text() = ('XMM0', 'XMM1', 'XMM2', 'XMM3', 'XMM4', 'XMM5', 'XMM6', 'XMM7', 'XMM8', 'XMM9', 'XMM10', 'XMM11', 'XMM12', 'XMM13', 'XMM14', 'XMM15')) or 
+    (@group = 'x87fpu' and text() = ('ST', 'ST1', 'ST2', 'ST3', 'ST4', 'ST5', 'ST6', 'ST7')) or 
+    (@group = 'systabp' and text() = ('TR', 'LDTR', 'GDTR', 'IDTR')) or 
+    (@group = 'xcr' and text() = ('XCR')) or 
+    (@group = 'ctrl' and text() = ('MSW', 'CR0')) or 
+    (@group = 'debug' and text() = ('DR6', 'DR7')) or 
+    (@group = 'msr' and text() = ('IA32_BIOS_SIGN_ID', 'IA32_SYSENTER_EIP', 'IA32_SYSENTER_ESP', 'IA32_SYSENTER_CS', 'MSR', 'PMC', 'IA32_LSTAR', 'IA32_STAR', 'IA32_FMASK', 'IA32_KERNEL_GSBASE', 'IA32_TIME_STAMP_COUNTER', 'IA32_TSC_AUX')) else true()"/> <!-- Implicit operands !-->  
   </xs:complexType>
   
 <xs:simpleType name="AddressType">  

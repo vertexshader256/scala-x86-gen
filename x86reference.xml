@@ -10255,7 +10255,7 @@ Should I add this comment?
 	<proc_start lat_step="yes">12</proc_start>
 	<syntax>
 	  <mnem>PCMPISTRM</mnem>
-          <dst nr="0" group="xmm" displayed="no">XMM0</dst>
+    <dst nr="0" group="xmm" displayed="no">XMM0</dst>
 	  <src><a>V</a><t>dq</t></src>
 	  <src><a>W</a><t>dq</t></src>
 	  <src><a>I</a><t>b</t></src>
@@ -12897,7 +12897,7 @@ Should I add this comment?
 	  <src nr="7" group="xmm" displayed="no">XMM7</src>
 	  <src nr="8" group="xmm" displayed="no">XMM8</src>
 	  <src nr="9" group="xmm" displayed="no">XMM9</src>
-	  <src nr="10" group="xmm" displayed="no">XMM10</src>
+    <src nr="10" group="xmm" displayed="no">XMM10</src>
 	  <src nr="11" group="xmm" displayed="no">XMM11</src>
 	  <src nr="12" group="xmm" displayed="no">XMM12</src>
 	  <src nr="13" group="xmm" displayed="no">XMM13</src>
