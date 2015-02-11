@@ -52,14 +52,22 @@
   <xs:complexType name="entryType">
     <xs:all>
       <xs:element name="proc_start" minOccurs="0" maxOccurs="1">
-        <xs:complexType mixed="true">
+        <xs:complexType>
+        <xs:simpleContent>
+          <xs:extension base="xs:integer">
           <xs:attribute name="post" use="optional" type="yes_no"/>
           <xs:attribute name="lat_step" use="optional" type="yes_no"/>
+          </xs:extension>
+          </xs:simpleContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="sec_opcd" minOccurs="0" maxOccurs="1">
-        <xs:complexType mixed="true">
+        <xs:complexType>
+         <xs:simpleContent>
+          <xs:extension base="xs:hexBinary">
           <xs:attribute name="escape" use="optional" type="yes_no"/>
+          </xs:extension>
+          </xs:simpleContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="opcd_ext" minOccurs="0" maxOccurs="1">
@@ -96,13 +104,21 @@
       <!-- more than 1 here?! -->
       <xs:element name="grp3" minOccurs="0" maxOccurs="1" type="xs:string"/>
       <xs:element name="modif_f" minOccurs="0" maxOccurs="1">
-        <xs:complexType mixed="true">
+        <xs:complexType>
+        <xs:simpleContent>
+          <xs:extension base="xs:string">
           <xs:attribute name="cond" use="optional" type="yes_no"/>
+          </xs:extension>
+          </xs:simpleContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="def_f" minOccurs="0" maxOccurs="1">
-        <xs:complexType mixed="true">
+        <xs:complexType>
+        <xs:simpleContent>
+          <xs:extension base="xs:string">
           <xs:attribute name="cond" use="optional" type="xs:string"/>
+          </xs:extension>
+          </xs:simpleContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="undef_f" minOccurs="0" maxOccurs="1" type="xs:string"/>
@@ -214,8 +230,12 @@
     <xs:sequence minOccurs="0">
       <xs:sequence minOccurs="1">
         <xs:element name="mnem" minOccurs="1" maxOccurs="1">
-          <xs:complexType mixed="true">
+          <xs:complexType>
+          <xs:simpleContent>
+              <xs:extension base="xs:string">
             <xs:attribute name="sug" use="optional" type="yes_no"/>
+            </xs:extension>
+            </xs:simpleContent>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
