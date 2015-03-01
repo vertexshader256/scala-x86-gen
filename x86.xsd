@@ -240,8 +240,30 @@
         </xs:element>
       </xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="36">
-        <xs:element name="src" minOccurs="0" maxOccurs="1" type="operandType"/>
-        <xs:element name="dst" minOccurs="0" maxOccurs="1" type="operandType"/>
+        <xs:element name="src" minOccurs="0" maxOccurs="1" type="operandType">
+          <xs:alternative test="@group='gen'" type="GENoperandType"/>
+          <xs:alternative test="@group='mmx'" type="MMXoperandType"/>
+          <xs:alternative test="@group='x87fpu'" type="X87operandType"/>
+          <xs:alternative test="@group='seg'" type="SEGoperandType"/>
+          <xs:alternative test="@group='systabp'" type="SYSoperandType"/>
+          <xs:alternative test="@group='ctrl'" type="CTRLoperandType"/>
+          <xs:alternative test="@group='msr'" type="MSRoperandType"/>
+          <xs:alternative test="@group='xmm'" type="XMMoperandType"/>
+          <xs:alternative test="@group='debug'" type="DEBUGoperandType"/>
+          <xs:alternative test="@group='xcr'" type="XCRoperandType"/>
+        </xs:element>
+        <xs:element name="dst" minOccurs="0" maxOccurs="1" type="operandType">
+          <xs:alternative test="@group='gen'" type="GENoperandType"/>
+          <xs:alternative test="@group='mmx'" type="MMXoperandType"/>
+          <xs:alternative test="@group='x87fpu'" type="X87operandType"/>
+          <xs:alternative test="@group='seg'" type="SEGoperandType"/>
+          <xs:alternative test="@group='systabp'" type="SYSoperandType"/>
+          <xs:alternative test="@group='ctrl'" type="CTRLoperandType"/>
+          <xs:alternative test="@group='msr'" type="MSRoperandType"/>
+          <xs:alternative test="@group='xmm'" type="XMMoperandType"/>
+          <xs:alternative test="@group='debug'" type="DEBUGoperandType"/>
+          <xs:alternative test="@group='xcr'" type="XCRoperandType"/>
+        </xs:element>
       </xs:choice>
     </xs:sequence>
     <xs:attribute name="mod" use="optional" type="xs:string"/>
@@ -303,16 +325,86 @@
     <xs:assert test="if (a) then not(@address) else true()"/> <!-- if there is an a element, there shall not be a address attribute !-->
     <xs:assert test="if (t) then not(@type) else true()"/> <!-- if there is an t element, there shall not be a type attribute !-->
     <xs:assert test="if (text()[contains(., ':')]) then @displayed = 'no' or @address = ('X', 'Y', 'BB') else true()"/> <!-- if an explicit operand is called out and it contains a colon, @displayed shall be 'no' or the address shall be X,Y, or BB !-->
-    <xs:assert test="if (text() and @group) then (@group = 'gen' and upper-case(text()) = ('ES', 'AX', 'BX', 'CX', 'DX', 'SP', 'BP', 'SI', 'DI', 'RAX', 'RBX', 'RDX', 'RCX', 'RBP', 'RSP', 'AL', 'CL', 'EAX', 'EBX', 'ECX', 'EDX', 'ESP', 'EBP', 'ESI', 'EDI', 'AH', 'R11')) or
-    (@group = 'mmx' and text() = ('MMX0', 'MMX1', 'MMX2', 'MMX3', 'MMX4', 'MMX5', 'MMX6', 'MMX7')) or 
-    (@group = 'seg' and text() = ('CS', 'DS', 'GS', 'SS', 'ES', 'FS')) or 
-    (@group = 'xmm' and text() = ('XMM0', 'XMM1', 'XMM2', 'XMM3', 'XMM4', 'XMM5', 'XMM6', 'XMM7', 'XMM8', 'XMM9', 'XMM10', 'XMM11', 'XMM12', 'XMM13', 'XMM14', 'XMM15')) or 
-    (@group = 'x87fpu' and text() = ('ST', 'ST1', 'ST2', 'ST3', 'ST4', 'ST5', 'ST6', 'ST7')) or 
-    (@group = 'systabp' and text() = ('TR', 'LDTR', 'GDTR', 'IDTR')) or 
-    (@group = 'xcr' and text() = ('XCR')) or 
-    (@group = 'ctrl' and text() = ('MSW', 'CR0')) or 
-    (@group = 'debug' and text() = ('DR6', 'DR7')) or 
-    (@group = 'msr' and text() = ('IA32_BIOS_SIGN_ID', 'IA32_SYSENTER_EIP', 'IA32_SYSENTER_ESP', 'IA32_SYSENTER_CS', 'MSR', 'PMC', 'IA32_LSTAR', 'IA32_STAR', 'IA32_FMASK', 'IA32_KERNEL_GSBASE', 'IA32_TIME_STAMP_COUNTER', 'IA32_TSC_AUX')) else true()"/> <!-- Implicit operands !-->  
+  </xs:complexType>
+
+  <xs:complexType name="GENoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (upper-case(text()) = ('ES', 'AX', 'BX', 'CX', 'DX', 'SP', 'BP', 'SI', 'DI', 'RAX', 'RBX', 'RDX', 'RCX', 'RBP', 'RSP', 'AL', 'CL', 'EAX', 'EBX', 'ECX', 'EDX', 'ESP', 'EBP', 'ESI', 'EDI', 'AH', 'R11')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>  
+  
+  <xs:complexType name="MMXoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('MMX0', 'MMX1', 'MMX2', 'MMX3', 'MMX4', 'MMX5', 'MMX6', 'MMX7')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="SEGoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('CS', 'DS', 'GS', 'SS', 'ES', 'FS')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="XMMoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('XMM0', 'XMM1', 'XMM2', 'XMM3', 'XMM4', 'XMM5', 'XMM6', 'XMM7', 'XMM8', 'XMM9', 'XMM10', 'XMM11', 'XMM12', 'XMM13', 'XMM14', 'XMM15')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="X87operandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('ST', 'ST1', 'ST2', 'ST3', 'ST4', 'ST5', 'ST6', 'ST7')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="SYSoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('TR', 'LDTR', 'GDTR', 'IDTR')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="XCRoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('XCR')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="CTRLoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('MSW', 'CR0')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="DEBUGoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('DR6', 'DR7')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="MSRoperandType" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="operandType">
+        <xs:assert test="if (text()) then (text() = ('IA32_BIOS_SIGN_ID', 'IA32_SYSENTER_EIP', 'IA32_SYSENTER_ESP', 'IA32_SYSENTER_CS', 'MSR', 'PMC', 'IA32_LSTAR', 'IA32_STAR', 'IA32_FMASK', 'IA32_KERNEL_GSBASE', 'IA32_TIME_STAMP_COUNTER', 'IA32_TSC_AUX')) else true()"/>
+      </xs:restriction>
+    </xs:complexContent>
   </xs:complexType>
   
 <xs:simpleType name="AddressType">  
