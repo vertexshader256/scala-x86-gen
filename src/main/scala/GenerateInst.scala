@@ -96,7 +96,7 @@ object GenerateInst {
     def getOperand = None
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0 {\n"
+      val result = "implicit object " + name + " extends " + "_0 {\n"
       result
     }
 
@@ -115,7 +115,7 @@ object GenerateInst {
     def getOperand = Some(operand)
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand + "] {\n"
+      val result = "implicit object " + name + " extends " + "_1[" + operand + "] {\n"
       result
     }
 
@@ -144,7 +144,7 @@ object GenerateInst {
                                       entry: x86Entry) extends InstructionInstance {
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
+      val result = "implicit object " + name + " extends " + "_2[" + operands._1 + ", " + operands._2 + "] {\n"
       result
     }
 
@@ -547,11 +547,29 @@ object GenerateInst {
     
     val opcodeType = if (numOpcodeBytes == 1) "OneOpcode" else "TwoOpcodes"
     
-    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition(\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
+    def getOperandDescriptor(mnemonic: String) = {
+      val hasZeroOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86ZeroOperandInstruction]}   
+      val hasOneOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86OneOperandInstruction]} 
+      val hasTwoOperandsEntry = instructions.exists{inst => inst.isInstanceOf[x86TwoOperandInstruction]}
+      
+      val desc = Seq(
+        if (hasZeroOperandEntry) Some(s"ZeroOperands[$mnemonic]") else None,
+        if (hasOneOperandEntry) Some(s"OneOperand[$mnemonic]") else None,
+        if (hasTwoOperandsEntry) Some(s"TwoOperands[$mnemonic]") else None)
+      
+      desc.flatMap{x => x}.foldLeft(""){_ + " with " + _}
+    }
+      
+    writer.println(s"trait ${mnemonic.toUpperCase()} extends InstructionDefinition {")
+    writer.println("  val mnemonic = \"" + mnemonic + "\"")
+    writer.println("}")
     writer.println("")
-
+    writer.println(s"object $mnemonic extends $mnemonic${getOperandDescriptor(mnemonic)} with ${mnemonic.toUpperCase()}Impl")
+    writer.println("")
+    
     if (!low.isEmpty && !high.isEmpty) {
       writer.println("trait " + mnemonic.toUpperCase() + "Low {")
+      writer.println(s"  self: $mnemonic =>")
       val descriptions = Set[String]()
       for ((inst, index) <- lowInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
@@ -561,6 +579,7 @@ object GenerateInst {
       writer.println("}\n")
 
       writer.println("trait " + mnemonic.toUpperCase() + "Impl extends " + mnemonic.toUpperCase() + "Low {")
+      writer.println(s"  self: $mnemonic =>")
       for ((inst, index) <- highInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != high.last)
@@ -569,6 +588,7 @@ object GenerateInst {
       writer.println("}")
     } else {
       writer.println("trait " + mnemonic.toUpperCase() + "Impl {")
+      writer.println(s"  self: $mnemonic =>")
       for ((inst, index) <- instructions.zipWithIndex) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != instructions.last)
