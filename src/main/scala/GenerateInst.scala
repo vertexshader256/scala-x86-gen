@@ -500,9 +500,9 @@ object GenerateInst {
   }
 
   def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
-    val newFolder = new File("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
+    val newFolder = new File("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
     if (!newFolder.exists()) newFolder.mkdirs()
-    val writer = new PrintWriter("../ScalaAsm/x86/src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
+    val writer = new PrintWriter("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
     // assume all instructions for a mnemonic have the same numOpcodeByte values.  I've investigated - this is safe!
     val numOpcodeBytes = instructions.head.numOpcodeBytes
@@ -557,19 +557,23 @@ object GenerateInst {
         if (hasOneOperandEntry) Some(s"OneOperand[$mnemonic]") else None,
         if (hasTwoOperandsEntry) Some(s"TwoOperands[$mnemonic]") else None)
       
-      desc.flatMap{x => x}.foldLeft(""){_ + " with " + _}
+      val results = desc.flatMap{x => x}
+      if (results.isEmpty) {
+        ""
+      } else {
+        desc.flatMap{x => x}.reduce{_ + " with " + _}
+      }
     }
       
     writer.println(s"trait ${mnemonic.toUpperCase()} extends InstructionDefinition {")
     writer.println("  val mnemonic = \"" + mnemonic + "\"")
     writer.println("}")
     writer.println("")
-    writer.println(s"object $mnemonic extends $mnemonic${getOperandDescriptor(mnemonic)} with ${mnemonic.toUpperCase()}Impl")
+    writer.println(s"object $mnemonic extends ${getOperandDescriptor(mnemonic)} with ${mnemonic.toUpperCase()}Impl")
     writer.println("")
     
     if (!low.isEmpty && !high.isEmpty) {
-      writer.println("trait " + mnemonic.toUpperCase() + "Low {")
-      writer.println(s"  self: $mnemonic =>")
+      writer.println(s"trait ${mnemonic.toUpperCase()}Low extends $mnemonic {")
       val descriptions = Set[String]()
       for ((inst, index) <- lowInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
@@ -578,8 +582,7 @@ object GenerateInst {
       }
       writer.println("}\n")
 
-      writer.println("trait " + mnemonic.toUpperCase() + "Impl extends " + mnemonic.toUpperCase() + "Low {")
-      writer.println(s"  self: $mnemonic =>")
+      writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends ${mnemonic.toUpperCase()}Low {")
       for ((inst, index) <- highInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != high.last)
@@ -587,8 +590,7 @@ object GenerateInst {
       }
       writer.println("}")
     } else {
-      writer.println("trait " + mnemonic.toUpperCase() + "Impl {")
-      writer.println(s"  self: $mnemonic =>")
+      writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends $mnemonic {")
       for ((inst, index) <- instructions.zipWithIndex) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != instructions.last)
