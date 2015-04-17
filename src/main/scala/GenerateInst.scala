@@ -4,6 +4,7 @@ import java.io._
 import scala.xml._
 import java.io.PrintWriter
 import scala.collection.mutable.LinkedHashSet
+import scala.collection.immutable.SortedMap
 
 object GenerateInst {
 
@@ -603,6 +604,8 @@ object GenerateInst {
 
   def main(args: Array[String]): Unit = {
     try {
+      val instMap = scala.collection.mutable.Map[String, InstructionInstance]()
+      
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
       println(insts.size + " instruction instances generated!")
@@ -611,6 +614,9 @@ object GenerateInst {
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
+             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
+                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
+             }
              outputInstructionFile(mnem, uniqueInst, "General")
            }
            case _ =>
@@ -621,16 +627,22 @@ object GenerateInst {
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
+             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
+                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
+             }
              outputInstructionFile(mnem, uniqueInst, "x87")
            }
            case _ =>
          }
       
-      val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system").groupBy { x => x.mnemonic }
+      val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system" && inst.mnemonic != "MOV").groupBy { x => x.mnemonic }
       systemFiles.foreach{ 
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
+             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
+                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
+             }
              outputInstructionFile(mnem, uniqueInst, "System")
            }
            case _ =>
@@ -638,6 +650,20 @@ object GenerateInst {
       
       println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
       println("Done generating instructions!")
+      
+      val groups = instMap.groupBy{case (name, inst) => inst.opcode}.map{case (opcode, insts) => opcode -> insts.keySet.toSet}
+      val sorted: SortedMap[Int, Set[String]] = SortedMap.empty[Int, Set[String]] ++ groups
+      
+      val writer = new PrintWriter("test.scala", "UTF-8");
+      writer.println("import com.scalaAsm.x86.Instructions.General._")
+      writer.println("import com.scalaAsm.x86.Instructions.System._")
+      writer.println("import com.scalaAsm.x86.Instructions.x87._")
+      writer.println("import com.scalaAsm.x86.Instructions.x86Instruction")
+      writer.println("object instList {")
+      writer.println("  val blah = Map[Int, Set[x86Instruction]](")
+      writer.println(sorted.map{ case (opcode, insts) => s"    $opcode -> $insts"}.reduce{_ + ",\n" + _} + ")")
+      writer.println("}")
+      writer.close();
     } catch {
       case e: Exception => e.printStackTrace()
     }
