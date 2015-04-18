@@ -654,13 +654,16 @@ object GenerateInst {
       val groups = instMap.groupBy{case (name, inst) => inst.opcode}.map{case (opcode, insts) => opcode -> insts.keySet.toSet}
       val sorted: SortedMap[Int, Set[String]] = SortedMap.empty[Int, Set[String]] ++ groups
       
-      val writer = new PrintWriter("test.scala", "UTF-8");
+      val writer = new PrintWriter("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/InstructionMap.scala", "UTF-8");
+      
+      writer.println("package com.scalaAsm.x86.Instructions")
+      writer.println("")
       writer.println("import com.scalaAsm.x86.Instructions.General._")
       writer.println("import com.scalaAsm.x86.Instructions.System._")
       writer.println("import com.scalaAsm.x86.Instructions.x87._")
-      writer.println("import com.scalaAsm.x86.Instructions.x86Instruction")
-      writer.println("object instList {")
-      writer.println("  val blah = Map[Int, Set[x86Instruction]](")
+      writer.println("")
+      writer.println("object instructionMap {")
+      writer.println("  val instMap = Map[Int, Set[x86Instruction]](")
       writer.println(sorted.map{ case (opcode, insts) => s"    $opcode -> $insts"}.reduce{_ + ",\n" + _} + ")")
       writer.println("}")
       writer.close();
