@@ -6,7 +6,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.scalaAsm"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 //playScalaSettings
 

@@ -127,7 +127,7 @@ object GenerateInst {
     def getExplicitFormat = {
         operand.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
-            Seq("override def explicitFormat(op1: " + operand + ") = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n")
+            Seq("override def explicitFormat(op1: " + operand + ") = Some(InstructionFormat(addressingForm = NoModRM(), immediate = Array()))\n")
           case _ => Nil
         }
     }
@@ -158,14 +158,14 @@ object GenerateInst {
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32) {
         Seq("override def explicitFormat(op1: r32, op2: rm32) = {\n",
              "  if (op2.isInstanceOf[reg]) {\n",
-             "    Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))\n",
+             "    Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = Array()))\n",
              "  } else None\n",
              "}\n")
       } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
             operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32) {
         Seq("override def explicitFormat(op1: rm32, op2: r32) = {\n",
              "  if (op1.isInstanceOf[reg]) {\n",
-             "     Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))\n",
+             "     Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = Array()))\n",
              "  } else None\n",
              "}\n")
       } else {
