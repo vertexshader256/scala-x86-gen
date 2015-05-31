@@ -11,7 +11,7 @@ object GenerateInst {
   trait InstructionInstance {
     protected def getClassHeader(name: String): String
     protected def hasImplicitOperand: Boolean
-    protected def getExplicitFormat: Seq[String]
+    protected def getExplicitFormat: String
     val mnemonic: String
     def getSize: Int
     def opcode: Int
@@ -85,7 +85,7 @@ object GenerateInst {
         Nil
       }
       val footer = "}"
-      header +: (Seq(opcodeString, prefix, getExplicitFormat, implicitOp).flatten.map(x => "  " + x) :+ footer)
+      header +: (Seq(opcodeString, prefix, Seq(getExplicitFormat), implicitOp).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -102,7 +102,7 @@ object GenerateInst {
     }
 
     def hasImplicitOperand: Boolean = false
-    def getExplicitFormat = Nil
+    def getExplicitFormat = ""
 
     def getSize: Int = 0
   }
@@ -125,10 +125,10 @@ object GenerateInst {
     }
     
     def getExplicitFormat = {
-        operand.addressingMethod match {
-          case Some(OpcodeSelectsRegister) =>
-            Seq("override def explicitFormat(op1: " + operand + ") = Some(InstructionFormat(addressingForm = NoModRM(), immediate = Array()))\n")
-          case _ => Nil
+        if (List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operand.toString)) {
+          "val explicitFormat = new RmFormat{}\n"
+        } else {
+          "val explicitFormat = new ImmFormat{}\n"
         }
     }
 
@@ -154,24 +154,17 @@ object GenerateInst {
     def hasImplicitOperand = false
     
     def getExplicitFormat = {
-      if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
-            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32) {
-        Seq("override def explicitFormat(op1: r32, op2: rm32) = {\n",
-             "  if (op2.isInstanceOf[reg]) {\n",
-             "    Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = Array()))\n",
-             "  } else None\n",
-             "}\n")
-      } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
-            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32) {
-        Seq("override def explicitFormat(op1: rm32, op2: r32) = {\n",
-             "  if (op1.isInstanceOf[reg]) {\n",
-             "     Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = Array()))\n",
-             "  } else None\n",
-             "}\n")
+      if (List("r8", "r16", "r32", "r64", "Sreg").contains(operands._1.toString) &&
+          List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operands._2.toString)) {
+        "val explicitFormat = new RegRmFormat{}\n"
+      } else if (List("r8", "r16", "r32", "r64", "Sreg").contains(operands._2.toString) &&
+          List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operands._1.toString)) {     
+        "val explicitFormat = new MemRegFormat{}\n"
+      } else if (List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32").contains(operands._1.toString)) {     
+        "val explicitFormat = new RmImmFormat{}\n"
       } else {
-        Nil
+        "val explicitFormat = null\n"
       }
-      
     }
 
     def getSize: Int = {
@@ -370,7 +363,7 @@ object GenerateInst {
       def addy = addressingMethod.map { addy => addy.toString }.getOrElse("")
       def size = if (addy != "Sreg") operandSize.toString else "" 
       
-      explicitOperandName.map { name => 
+      val result = explicitOperandName.map { name => 
         if (name == "rAX") {
           operandSize.size match {
             case 16 => "AX"
@@ -382,6 +375,12 @@ object GenerateInst {
           name
         }
       }.getOrElse(addy + size)
+      
+      if (result == "STi/m32") { // hack for now!!! x87
+        "m32"
+      } else {
+        result
+      }
     }
     def isImplicit = false
   }
