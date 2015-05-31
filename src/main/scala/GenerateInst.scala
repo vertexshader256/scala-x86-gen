@@ -11,7 +11,7 @@ object GenerateInst {
   trait InstructionInstance {
     protected def getClassHeader(name: String): String
     protected def hasImplicitOperand: Boolean
-    protected def getExplicitFormat: String
+    protected def getFormat: String
     val mnemonic: String
     def getSize: Int
     def opcode: Int
@@ -85,7 +85,7 @@ object GenerateInst {
         Nil
       }
       val footer = "}"
-      header +: (Seq(opcodeString, prefix, Seq(getExplicitFormat), implicitOp).flatten.map(x => "  " + x) :+ footer)
+      header +: (Seq(opcodeString, prefix, Seq(getFormat), implicitOp).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -102,7 +102,7 @@ object GenerateInst {
     }
 
     def hasImplicitOperand: Boolean = false
-    def getExplicitFormat = ""
+    def getFormat = ""
 
     def getSize: Int = 0
   }
@@ -124,11 +124,11 @@ object GenerateInst {
       operand.isImplicit
     }
     
-    def getExplicitFormat = {
+    def getFormat = {
         if (List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operand.toString)) {
-          "val explicitFormat = new RmFormat{}\n"
+          "val format = RmFormat\n"
         } else {
-          "val explicitFormat = new ImmFormat{}\n"
+          "val format = ImmFormat\n"
         }
     }
 
@@ -153,17 +153,17 @@ object GenerateInst {
 
     def hasImplicitOperand = false
     
-    def getExplicitFormat = {
+    def getFormat = {
       if (List("r8", "r16", "r32", "r64", "Sreg").contains(operands._1.toString) &&
           List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operands._2.toString)) {
-        "val explicitFormat = new RegRmFormat{}\n"
+        "val format = RegRmFormat\n"
       } else if (List("r8", "r16", "r32", "r64", "Sreg").contains(operands._2.toString) &&
           List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operands._1.toString)) {     
-        "val explicitFormat = new MemRegFormat{}\n"
+        "val format = MemRegFormat\n"
       } else if (List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32").contains(operands._1.toString)) {     
-        "val explicitFormat = new RmImmFormat{}\n"
+        "val format = RmImmFormat\n"
       } else {
-        "val explicitFormat = null\n"
+        "val format = null\n"
       }
     }
 
