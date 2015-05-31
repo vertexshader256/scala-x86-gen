@@ -30,6 +30,10 @@ object GenerateInst {
       }
     }
     
+    def getRMInfo = {
+      s"val hasRMByte = ${entry.hasModRMByte}\n"
+    }
+    
     override def hashCode(): Int = {
       generateClass("")(0).hashCode
     }
@@ -85,7 +89,7 @@ object GenerateInst {
         Nil
       }
       val footer = "}"
-      header +: (Seq(opcodeString, prefix, Seq(getFormat), implicitOp).flatten.map(x => "  " + x) :+ footer)
+      header +: (Seq(opcodeString, prefix, Seq(getFormat), implicitOp, Seq(getRMInfo)).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -125,7 +129,9 @@ object GenerateInst {
     }
     
     def getFormat = {
-        if (List("rm8", "rm16", "rm32", "rm64", "r8", "r16", "r32", "r64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operand.toString)) {
+        if (List("r8", "r16", "r32", "r64").contains(operand.toString)) {
+          "val format = RegFormat\n"
+        } else if (List("rm8", "rm16", "rm32", "rm64", "m8", "m16", "m32", "m64", "m128", "m", "moffs8", "moffs16", "moffs32", "moffs64").contains(operand.toString)) {
           "val format = RmFormat\n"
         } else {
           "val format = ImmFormat\n"
