@@ -98,7 +98,7 @@ object GenerateInst {
     def getOperand = None
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + "_0 {\n"
+      val result = s"implicit object $name extends NoOp{\n"
       result
     }
 
@@ -117,7 +117,7 @@ object GenerateInst {
     def getOperand = Some(operand)
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + "_1[" + operand + "] {\n"
+      val result = s"implicit object $name extends OneOp[" + operand + "] {\n"
       result
     }
 
@@ -148,7 +148,7 @@ object GenerateInst {
                                       entry: x86Entry) extends InstructionInstance {
 
     def getClassHeader(name: String): String = {
-      val result = "implicit object " + name + " extends " + "_2[" + operands._1 + ", " + operands._2 + "] {\n"
+      val result = s"implicit object $name extends TwoOp[${operands._1}, ${operands._2}] {\n"
       result
     }
 
@@ -581,7 +581,7 @@ object GenerateInst {
       writer.println(s"trait ${mnemonic.toUpperCase()}Low extends $mnemonic {")
       val descriptions = Set[String]()
       for ((inst, index) <- lowInst) {
-        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        writer.println(inst.generateClass("_" + index).map(x => "  " + x).mkString)
         outputOrder += inst
         if (inst != low.last)
           writer.println("") 
@@ -590,7 +590,7 @@ object GenerateInst {
 
       writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends ${mnemonic.toUpperCase()}Low {")
       for ((inst, index) <- highInst) {
-        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        writer.println(inst.generateClass("_" + index).map(x => "  " + x).mkString)
         outputOrder += inst
         if (inst != high.last)
           writer.println("")
@@ -599,7 +599,7 @@ object GenerateInst {
     } else {
       writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends $mnemonic {")
       for ((inst, index) <- instructions.zipWithIndex) {
-        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        writer.println(inst.generateClass("_" + index).map(x => "  " + x).mkString)
         outputOrder += inst
         if (inst != instructions.last)
           writer.println("")
@@ -624,7 +624,7 @@ object GenerateInst {
              uniqueInst ++= insts
              val outputInsts = outputInstructionFile(mnem, uniqueInst, "General")
              outputInsts.zipWithIndex.foreach { case (inst, index) =>
-                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
+                instMap += inst.mnemonic + "._" + index -> inst
              }
            }
            case _ =>
@@ -637,7 +637,7 @@ object GenerateInst {
              uniqueInst ++= insts
              val outputInsts = outputInstructionFile(mnem, uniqueInst, "x87")
              outputInsts.zipWithIndex.foreach { case (inst, index) =>
-                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
+                instMap += inst.mnemonic + "._" + index -> inst
              }
            }
            case _ =>
@@ -649,7 +649,9 @@ object GenerateInst {
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
              val outputInsts = outputInstructionFile(mnem, uniqueInst, "System")
-             
+             outputInsts.zipWithIndex.foreach { case (inst, index) =>
+                instMap += inst.mnemonic + "._" + index -> inst
+             }
            }
            case _ =>
          }
