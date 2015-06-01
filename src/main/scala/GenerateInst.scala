@@ -5,6 +5,7 @@ import scala.xml._
 import java.io.PrintWriter
 import scala.collection.mutable.LinkedHashSet
 import scala.collection.immutable.SortedMap
+import scala.collection.mutable.ListBuffer
 
 object GenerateInst {
 
@@ -28,10 +29,6 @@ object GenerateInst {
       } else {
         false
       }
-    }
-    
-    def getRMInfo = {
-      s"val hasRMByte = ${entry.hasModRMByte}\n"
     }
     
     override def hashCode(): Int = {
@@ -89,7 +86,7 @@ object GenerateInst {
         Nil
       }
       val footer = "}"
-      header +: (Seq(opcodeString, prefix, Seq(getFormat), implicitOp, Seq(getRMInfo)).flatten.map(x => "  " + x) :+ footer)
+      header +: (Seq(opcodeString, prefix, Seq(getFormat), implicitOp).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -505,11 +502,31 @@ object GenerateInst {
     result
   }
 
-  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
+  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String): Seq[InstructionInstance] = {
     val newFolder = new File("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
     if (!newFolder.exists()) newFolder.mkdirs()
     val writer = new PrintWriter("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
+    val outputOrder = new ListBuffer[InstructionInstance]()
+    
+    def getOperandDescriptor(mnemonic: String) = {
+      val hasZeroOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86ZeroOperandInstruction]}   
+      val hasOneOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86OneOperandInstruction]} 
+      val hasTwoOperandsEntry = instructions.exists{inst => inst.isInstanceOf[x86TwoOperandInstruction]}
+      
+      val desc = Seq(
+        if (hasZeroOperandEntry) Some(s"ZeroOperands[$mnemonic]") else None,
+        if (hasOneOperandEntry) Some(s"OneOperand[$mnemonic]") else None,
+        if (hasTwoOperandsEntry) Some(s"TwoOperands[$mnemonic]") else None)
+      
+      val results = desc.flatMap{x => x}
+      if (results.isEmpty) {
+        ""
+      } else {
+        desc.flatMap{x => x}.reduce{_ + " with " + _}
+      }
+    }
+    
     // assume all instructions for a mnemonic have the same numOpcodeByte values.  I've investigated - this is safe!
     val numOpcodeBytes = instructions.head.numOpcodeBytes
 
@@ -552,24 +569,6 @@ object GenerateInst {
     writer.println("// Category: " + category + "\n")
     
     val opcodeType = if (numOpcodeBytes == 1) "OneOpcode" else "TwoOpcodes"
-    
-    def getOperandDescriptor(mnemonic: String) = {
-      val hasZeroOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86ZeroOperandInstruction]}   
-      val hasOneOperandEntry = instructions.exists{inst => inst.isInstanceOf[x86OneOperandInstruction]} 
-      val hasTwoOperandsEntry = instructions.exists{inst => inst.isInstanceOf[x86TwoOperandInstruction]}
-      
-      val desc = Seq(
-        if (hasZeroOperandEntry) Some(s"ZeroOperands[$mnemonic]") else None,
-        if (hasOneOperandEntry) Some(s"OneOperand[$mnemonic]") else None,
-        if (hasTwoOperandsEntry) Some(s"TwoOperands[$mnemonic]") else None)
-      
-      val results = desc.flatMap{x => x}
-      if (results.isEmpty) {
-        ""
-      } else {
-        desc.flatMap{x => x}.reduce{_ + " with " + _}
-      }
-    }
       
     writer.println(s"trait ${mnemonic.toUpperCase()} extends InstructionDefinition {")
     writer.println("  val mnemonic = \"" + mnemonic + "\"")
@@ -583,6 +582,7 @@ object GenerateInst {
       val descriptions = Set[String]()
       for ((inst, index) <- lowInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        outputOrder += inst
         if (inst != low.last)
           writer.println("") 
       }
@@ -591,6 +591,7 @@ object GenerateInst {
       writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends ${mnemonic.toUpperCase()}Low {")
       for ((inst, index) <- highInst) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        outputOrder += inst
         if (inst != high.last)
           writer.println("")
       }
@@ -599,12 +600,14 @@ object GenerateInst {
       writer.println(s"trait ${mnemonic.toUpperCase()}Impl extends $mnemonic {")
       for ((inst, index) <- instructions.zipWithIndex) {
         writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
+        outputOrder += inst
         if (inst != instructions.last)
           writer.println("")
       }
       writer.println("}")
     }
     writer.close();
+    outputOrder.toSeq
   }
 
   def main(args: Array[String]): Unit = {
@@ -619,10 +622,10 @@ object GenerateInst {
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
-             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
+             val outputInsts = outputInstructionFile(mnem, uniqueInst, "General")
+             outputInsts.zipWithIndex.foreach { case (inst, index) =>
                 instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
              }
-             outputInstructionFile(mnem, uniqueInst, "General")
            }
            case _ =>
          }
@@ -632,10 +635,10 @@ object GenerateInst {
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
-             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
+             val outputInsts = outputInstructionFile(mnem, uniqueInst, "x87")
+             outputInsts.zipWithIndex.foreach { case (inst, index) =>
                 instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
              }
-             outputInstructionFile(mnem, uniqueInst, "x87")
            }
            case _ =>
          }
@@ -645,13 +648,13 @@ object GenerateInst {
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
-             uniqueInst.toSet.zipWithIndex.foreach { case (inst, index) =>
-                instMap += inst.mnemonic + "." + inst.mnemonic + "_" + index -> inst
-             }
-             outputInstructionFile(mnem, uniqueInst, "System")
+             val outputInsts = outputInstructionFile(mnem, uniqueInst, "System")
+             
            }
            case _ =>
          }
+      
+      
       
       println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
       println("Done generating instructions!")
