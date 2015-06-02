@@ -661,10 +661,11 @@ object GenerateInst {
       println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
       println("Done generating instructions!")
       
-      val groups = instMap.groupBy{case (name, inst) => inst.opcode}.map{case (opcode, insts) => opcode -> insts.keySet.toSet}
+      val groups = instMap.groupBy{case (name, inst) => if (inst.numOpcodeBytes == 1)  inst.opcode else 0x0F00 + inst.opcode}.map{case (opcode, insts) => opcode -> insts.keySet.toSet}
       val sorted: SortedMap[Int, Set[String]] = SortedMap.empty[Int, Set[String]] ++ groups
       
       val writer = new PrintWriter("../scala-x86-inst/src/main/scala/com/scalaAsm/x86/Instructions/InstructionMap.scala", "UTF-8");
+      
       
       writer.println("package com.scalaAsm.x86.Instructions")
       writer.println("")
@@ -674,7 +675,13 @@ object GenerateInst {
       writer.println("")
       writer.println("object instructionMap {")
       writer.println("  val instMap = Map[Int, Set[x86Instruction]](")
-      writer.println(sorted.map{ case (opcode, insts) => s"    $opcode -> $insts"}.reduce{_ + ",\n" + _} + ")")
+      writer.println(sorted.map{ case (opcode, insts) => {
+        val hex = Integer.toHexString(opcode)
+        if (hex.size%2 == 1)
+          s"    0x0$hex -> $insts"
+        else
+          s"    0x$hex -> $insts"
+      }}.reduce{_ + ",\n" + _} + ")")
       writer.println("}")
       writer.close();
     } catch {
