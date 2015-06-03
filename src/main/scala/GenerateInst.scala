@@ -558,9 +558,6 @@ object GenerateInst {
     writer.println("package Instructions");
     writer.println("package " + folder.replace('/', '.'));
     writer.println("")
-    writer.println("import com.scalaAsm.x86.Operands._")
-    writer.println("import com.scalaAsm.x86.Operands.Memory._")
-    writer.println("")
     
     if (desc != "") {
       writer.println("// Description: " + desc)
@@ -673,7 +670,7 @@ object GenerateInst {
       writer.println("import com.scalaAsm.x86.Instructions.System._")
       writer.println("import com.scalaAsm.x86.Instructions.x87._")
       writer.println("")
-      writer.println("object instructionMap {")
+      writer.println("object InstructionMap {")
       writer.println("  val instMap = Map[Int, Set[x86Instruction]](")
       writer.println(sorted.map{ case (opcode, insts) => {
         val hex = Integer.toHexString(opcode)
